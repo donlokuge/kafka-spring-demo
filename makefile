@@ -9,3 +9,6 @@ run-producer:
 
 run-consumer:
 	nx run kafka-consumer:serve
+
+run-api:
+	nx run spring-api:bootRun
