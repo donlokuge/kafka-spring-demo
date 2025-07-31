@@ -1,4 +1,4 @@
-import { Kafka, Consumer, EachMessagePayload } from 'kafkajs';
+import { Consumer, EachMessagePayload } from 'kafkajs';
 import Redis from 'ioredis';
 
 export interface KafkaConsumerOptions {
@@ -40,7 +40,7 @@ export class ConsumerService {
         0,
         this.options.redisMaxLength - 1
       );
-      console.log(`📥 Stored Kafka message from topic "${topic}":`, entry);
+      console.log(`📥 Stored message from topic "${topic}":`, entry);
     } catch (error) {
       console.error('❌ Failed to store message in Redis:', error);
     }
