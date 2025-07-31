@@ -68,10 +68,12 @@ nx run spring-api:bootRun
 ```
 
 ## 📁 Repo Structure
+```text
 apps/
 ├── kafka-consumer/   # TypeScript Kafka consumer
 ├── kafka-producer/   # TypeScript Kafka producer
 └── spring-api/       # Java Spring Boot REST API
+```
 
 Swagger UI for API
 - Access at `http://localhost:8080/swagger-ui.html`
