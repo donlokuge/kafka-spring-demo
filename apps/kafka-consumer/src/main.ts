@@ -1,42 +1,26 @@
-import { Kafka, Consumer, EachMessagePayload } from 'kafkajs';
+import { Kafka } from 'kafkajs';
+import Redis from 'ioredis';
+import { ConsumerService, KafkaConsumerOptions } from './services/consumer.service';
 
-const KAFKA_BROKERS = (process.env.KAFKA_BROKERS ?? 'localhost:9092').split(
-  ','
-);
-const TOPIC = process.env.KAFKA_TOPIC ?? 'test-topic';
-const GROUP_ID = process.env.KAFKA_GROUP_ID ?? 'demo-group';
-const CLIENT_ID = process.env.KAFKA_CLIENT_ID ?? 'consumer-app';
+const config: KafkaConsumerOptions = {
+  topic: process.env.KAFKA_TOPIC ?? 'test-topic',
+  redisKey: process.env.REDIS_KEY ?? 'kafka:messages',
+  redisMaxLength: parseInt(process.env.REDIS_MAX_LENGTH ?? '100', 10),
+};
 
 const kafka = new Kafka({
-  clientId: CLIENT_ID,
-  brokers: KAFKA_BROKERS,
+  clientId: process.env.KAFKA_CLIENT_ID ?? 'consumer-app',
+  brokers: (process.env.KAFKA_BROKERS ?? 'localhost:9092').split(','),
 });
 
-const consumer: Consumer = kafka.consumer({ groupId: GROUP_ID });
+const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379');
+const consumer = kafka.consumer({
+  groupId: process.env.KAFKA_GROUP_ID ?? 'demo-group',
+});
 
-async function runConsumer(): Promise<void> {
-  try {
-    await consumer.connect();
-    await consumer.subscribe({ topic: TOPIC, fromBeginning: true });
+const app = new ConsumerService(consumer, redis, config);
 
-    console.log(`🚀 Listening to topic "${TOPIC}" as group "${GROUP_ID}"`);
-
-    await consumer.run({
-      eachMessage: async ({
-        topic,
-        partition,
-        message,
-      }: EachMessagePayload) => {
-        const value = message.value?.toString() ?? '';
-        console.log(
-          `📥 Received [${topic}] | Partition: ${partition} | ${value}`
-        );
-      },
-    });
-  } catch (error) {
-    console.error('❌ Kafka consumer failed to start:', error);
-    process.exit(1);
-  }
-}
-
-runConsumer();
+app.start().catch((err) => {
+  console.error('❌ Failed to start consumer:', err);
+  process.exit(1);
+});
