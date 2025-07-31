@@ -1,21 +1,42 @@
-import { Kafka } from 'kafkajs';
+import { Kafka, Consumer, EachMessagePayload } from 'kafkajs';
+
+const KAFKA_BROKERS = (process.env.KAFKA_BROKERS ?? 'localhost:9092').split(
+  ','
+);
+const TOPIC = process.env.KAFKA_TOPIC ?? 'test-topic';
+const GROUP_ID = process.env.KAFKA_GROUP_ID ?? 'demo-group';
+const CLIENT_ID = process.env.KAFKA_CLIENT_ID ?? 'consumer-app';
 
 const kafka = new Kafka({
-  clientId: 'consumer-app',
-  brokers: ['localhost:9092'],
+  clientId: CLIENT_ID,
+  brokers: KAFKA_BROKERS,
 });
 
-const consumer = kafka.consumer({ groupId: 'demo-group' });
+const consumer: Consumer = kafka.consumer({ groupId: GROUP_ID });
 
-async function run() {
-  await consumer.connect();
-  await consumer.subscribe({ topic: 'test-topic', fromBeginning: true });
+async function runConsumer(): Promise<void> {
+  try {
+    await consumer.connect();
+    await consumer.subscribe({ topic: TOPIC, fromBeginning: true });
 
-  await consumer.run({
-    eachMessage: async ({ topic, partition, message }) => {
-      console.log(`Received message: ${message.value?.toString()}`);
-    },
-  });
+    console.log(`🚀 Listening to topic "${TOPIC}" as group "${GROUP_ID}"`);
+
+    await consumer.run({
+      eachMessage: async ({
+        topic,
+        partition,
+        message,
+      }: EachMessagePayload) => {
+        const value = message.value?.toString() ?? '';
+        console.log(
+          `📥 Received [${topic}] | Partition: ${partition} | ${value}`
+        );
+      },
+    });
+  } catch (error) {
+    console.error('❌ Kafka consumer failed to start:', error);
+    process.exit(1);
+  }
 }
 
-run().catch(console.error);
+runConsumer();

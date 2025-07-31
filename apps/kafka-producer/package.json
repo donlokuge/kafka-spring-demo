@@ -1,0 +1,71 @@
+{
+  "name": "@kafka-spring-demo/kafka-producer",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/esbuild:esbuild",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "defaultConfiguration": "production",
+        "options": {
+          "platform": "node",
+          "outputPath": "apps/kafka-producer/dist",
+          "format": [
+            "cjs"
+          ],
+          "bundle": false,
+          "main": "apps/kafka-producer/src/main.ts",
+          "tsConfig": "apps/kafka-producer/tsconfig.app.json",
+          "assets": [
+            "apps/kafka-producer/src/assets"
+          ],
+          "esbuildOptions": {
+            "sourcemap": true,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        },
+        "configurations": {
+          "development": {},
+          "production": {
+            "esbuildOptions": {
+              "sourcemap": false,
+              "outExtension": {
+                ".js": ".js"
+              }
+            }
+          }
+        }
+      },
+      "serve": {
+        "continuous": true,
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "@kafka-spring-demo/kafka-producer:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "@kafka-spring-demo/kafka-producer:build:development"
+          },
+          "production": {
+            "buildTarget": "@kafka-spring-demo/kafka-producer:build:production"
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}

@@ -40,7 +40,10 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["apps/kafka-consumer-e2e/**/*"]
+      "exclude": [
+        "apps/kafka-consumer-e2e/**/*",
+        "apps/kafka-producer-e2e/**/*"
+      ]
     }
   ],
   "targetDefaults": {

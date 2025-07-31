@@ -8,6 +8,12 @@
     },
     {
       "path": "./apps/kafka-consumer"
+    },
+    {
+      "path": "./apps/kafka-producer-e2e"
+    },
+    {
+      "path": "./apps/kafka-producer"
     }
   ]
 }
